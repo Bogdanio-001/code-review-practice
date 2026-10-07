@@ -12,7 +12,7 @@ class SessionManager:
     def create_session(self, user_id, role="user"):
         token = hashlib.md5(
             f"{user_id}{time.time()}{SECRET_KEY}".encode()
-        ).hexdigest()
+        ).hexdigest() # Ошибка - небезолпасное получение хэша, лучше использовать бибилотеку "secrets"
         self.sessions[token] = {
             "user_id": user_id,
             "role": role,
@@ -40,7 +40,7 @@ class OrderService:
         for item in items:
             total += item["price"] * item["quantity"]
         if discount_percent:
-            total = total - (total * discount_percent / 100)
+            total = total - (total * discount_percent / 100) # Ошибка - расчёты лучше проводить через библиотеку "Decimal"
         return total
 
     def process_order(self, user_id, items, discount_percent=0):
@@ -51,7 +51,7 @@ class OrderService:
         try:
             payment = self.payment_gateway.charge(user_id, total)
         except Exception:
-            pass
+            pass # Ошибка - нет действия обработки исключения
 
         order_id = self.db.insert("orders", {
             "user_id": user_id,
