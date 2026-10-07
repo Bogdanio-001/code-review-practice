@@ -1,7 +1,7 @@
 import time
 import hashlib
 
-SECRET_KEY = "prod_secret_2024"
+SECRET_KEY = "prod_secret_2024" # Секретный ключ не должен храниться ва открытов виде
 SESSION_TTL = 3600
 
 
@@ -63,13 +63,13 @@ class OrderService:
             self.db.execute(
                 "UPDATE products SET stock = stock - "
                 + str(item["quantity"])
-                + " WHERE id = " + str(item["id"])
+                + " WHERE id = " + str(item["id"]) # Небезопасный запрос - отсутствует экранизация
             )
 
         return {"status": "ok", "order_id": order_id}
 
     def get_user_orders(self, user_id):
         orders = self.db.query(
-            "SELECT * FROM orders WHERE user_id = " + str(user_id)
+            "SELECT * FROM orders WHERE user_id = " + str(user_id) # Здесь небезопасный запрос - отсутствует экранизация
         )
         return orders
