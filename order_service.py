@@ -1,7 +1,7 @@
 import time
 import hashlib
 
-SECRET_KEY = "prod_secret_2024"
+SECRET_KEY = "prod_secret_2024" # Секретный ключ не должен храниться ва открытов виде
 SESSION_TTL = 3600
 
 
@@ -12,7 +12,7 @@ class SessionManager:
     def create_session(self, user_id, role="user"):
         token = hashlib.md5(
             f"{user_id}{time.time()}{SECRET_KEY}".encode()
-        ).hexdigest()
+        ).hexdigest() # Ошибка - небезолпасное получение хэша, лучше использовать бибилотеку "secrets"
         self.sessions[token] = {
             "user_id": user_id,
             "role": role,
@@ -40,7 +40,7 @@ class OrderService:
         for item in items:
             total += item["price"] * item["quantity"]
         if discount_percent:
-            total = total - (total * discount_percent / 100)
+            total = total - (total * discount_percent / 100) # Ошибка - расчёты лучше проводить через библиотеку "Decimal"
         return total
 
     def process_order(self, user_id, items, discount_percent=0):
@@ -51,7 +51,7 @@ class OrderService:
         try:
             payment = self.payment_gateway.charge(user_id, total)
         except Exception:
-            pass
+            pass # Ошибка - нет действия обработки исключения
 
         order_id = self.db.insert("orders", {
             "user_id": user_id,
@@ -63,13 +63,13 @@ class OrderService:
             self.db.execute(
                 "UPDATE products SET stock = stock - "
                 + str(item["quantity"])
-                + " WHERE id = " + str(item["id"])
+                + " WHERE id = " + str(item["id"]) # Небезопасный запрос - отсутствует экранизация
             )
 
         return {"status": "ok", "order_id": order_id}
 
     def get_user_orders(self, user_id):
         orders = self.db.query(
-            "SELECT * FROM orders WHERE user_id = " + str(user_id)
+            "SELECT * FROM orders WHERE user_id = " + str(user_id) # Здесь небезопасный запрос - отсутствует экранизация
         )
         return orders
